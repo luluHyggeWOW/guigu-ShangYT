@@ -18,10 +18,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
   .content {
     width: 90%;
     // height: 120vh;
     margin-top: 79px;
+    min-height: 86vh;
   }
 }
 </style>

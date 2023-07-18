@@ -3,34 +3,42 @@
     <div class="content">
       <div class="left">地区：</div>
       <ul class="hp">
-        <li class="active">全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
-        <li>全部</li>
+        <li :class="{active:activeFlag==''}" @click="changeLevel('')">全部</li>
+        <li v-for="item in regionArr" :key="item.value" @click="changeLevel(item.value)"
+          :class="{active:activeFlag==item.value}">{{item.name}}</li>
       </ul>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type {
+  HospitalLevelOrRegionArr,
+  HospitalLevelOrRegionArrResponseData,
+} from "@/api/home/type";
+import { reqHospitalLevelOrRegion } from "@/api/home";
+import { ref, onMounted } from "vue";
+let regionArr = ref<HospitalLevelOrRegionArr>();
+let activeFlag = ref<string>("");
+const getRegion = async () => {
+  let result: HospitalLevelOrRegionArrResponseData =
+    await reqHospitalLevelOrRegion("Beijin");
+  console.log(result);
+  if (result.code == 200) {
+    console.log(result);
+    regionArr.value = result.data;
+  } else {
+  }
+};
+const changeLevel = (value: any) => {
+  activeFlag.value = value;
+  $emit("getRegion", value);
+};
+
+let $emit = defineEmits(["getRegion"]);
+onMounted(() => {
+  getRegion();
+});
 </script>
 
 <style scoped lang="scss">
