@@ -6,33 +6,46 @@ export default createRouter({
   routes: [
     {
       path: '/home',
-      component: () => import('@/pages/home/index.vue')
+      component: () => import('@/pages/home/index.vue'),
+      meta: {
+        title: '首页',
+      }
     },
     {
-      path: '/hospital',
-      component: () => import('@/pages/hospital/index.vue'),
-      children: [
-        {
-          path: 'register',
-          component: () => import('@/pages/hospital/register/index.vue'),
-        },
-        {
-          path: 'detail',
-          component: () => import('@/pages/hospital/detail/index.vue'),
-        },
-        {
-          path: 'notice',
-          component: () => import('@/pages/hospital/notice/index.vue'),
-        },
-        {
-          path: 'close',
-          component: () => import('@/pages/hospital/close/index.vue'),
-        },
-        {
-          path: 'search',
-          component: () => import('@/pages/hospital/search/index.vue'),
-        },
-      ]
+      path: '/shop',
+      component: () => import('@/pages/shop/index.vue')
+      ,
+      meta: {
+        title: '市场管理',
+      }
+    },
+    {
+      path: '/news',
+      component: () => import('@/pages/news/index.vue'),
+      meta: {
+        title: '新闻管理',
+      }
+    },
+    {
+      path: '/user',
+      component: () => import('@/pages/user/index.vue'),
+      meta: {
+        title: '用户管理',
+      }
+    },
+    {
+      path: '/fankui',
+      component: () => import('@/pages/fankui/index.vue'),
+      meta: {
+        title: '反馈管理',
+      }
+    },
+    {
+      path: '/forum',
+      component: () => import('@/pages/forum/index.vue'),
+      meta: {
+        title: '论坛管理',
+      }
     },
     {
       path: '/',
