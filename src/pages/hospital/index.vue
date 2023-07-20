@@ -65,7 +65,14 @@ import useDetailStore from "@/store/modules/hospital";
 let $route = useRoute();
 let detailStore = useDetailStore();
 onMounted(() => {
-  detailStore.getHospital($route.query.hoscode);
+  if ($route.query.hoscode != undefined) {
+    localStorage.setItem("hoscode", $route.query.hoscode as string);
+    detailStore.getHospital($route.query.hoscode as string);
+    detailStore.getDeparment($route.query.hoscode as string);
+  } else {
+    detailStore.getHospital(localStorage.getItem("hoscode") as string);
+    detailStore.getDeparment(localStorage.getItem("hoscode") as string);
+  }
 });
 </script>
 

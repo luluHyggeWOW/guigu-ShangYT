@@ -33,6 +33,28 @@
           退号时间：就诊前一工作日{{hospitalStore.hospitalInfo.bookingRule?.quitTime}}前取消
         </div>
         <div class="title">医院预约规则</div>
+        <div class="ruleinfo" v-for="(item,index) in hospitalStore.hospitalInfo.bookingRule?.rule" :key="index">
+          {{index+1}}、{{item}}
+        </div>
+      </div>
+    </div>
+    <div class="deparment">
+      <div class="leftNav">
+        <ul>
+          <li v-for="(deparment,index) in hospitalStore.deparmentArr" :key="deparment.depcode"
+            :class="{active:currentIndex==index}" @click="changeIndex(index)">
+            {{deparment.depname}}</li>
+        </ul>
+      </div>
+      <div class="deparmentInfo">
+        <div class="show" v-for="(deparment) in hospitalStore.deparmentArr" :key="deparment.depcode">
+          <h1 class="cur">{{deparment.depname}}</h1>
+          <ul>
+            <li v-for="(children) in deparment.children" :key="children.depcode">
+              <p @click="showLogin()">{{children.depname}}</p>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -40,7 +62,23 @@
 
 <script setup lang="ts">
 import useDetailStore from "@/store/modules/hospital";
+import { ref } from "vue";
+import useUserStore from "@/store/modules/user";
+let userStore = useUserStore();
 let hospitalStore = useDetailStore();
+let currentIndex = ref<number>(0);
+console.log(111, hospitalStore.deparmentArr);
+const changeIndex = (index: number) => {
+  currentIndex.value = index;
+  let allH1 = document.querySelectorAll(".cur");
+  allH1[currentIndex.value].scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+};
+const showLogin = () => {
+  userStore.visiable = true;
+};
 </script>
 
 <style scoped lang="scss">
@@ -85,8 +123,72 @@ let hospitalStore = useDetailStore();
       .time,
       .address,
       .route,
-      .releasetime {
+      .releasetime,
+      .ruleinfo {
         color: #7f7f7f;
+      }
+    }
+  }
+  .deparment {
+    width: 100%;
+    height: 500px;
+    display: flex;
+    font-size: 15px;
+    color: #7f7f7f;
+    margin-top: 20px;
+    .leftNav {
+      width: 100px;
+      ul {
+        width: 100%;
+        height: 100%;
+        background: rgb(248, 248, 248);
+        display: flex;
+        flex-direction: column;
+        li {
+          flex: 1;
+          text-align: center;
+          color: #7f7f7f;
+          line-height: 40px;
+          cursor: pointer;
+          border-left: 1px solid transparent;
+          &.active {
+            background: white;
+            border-left: 1px solid red;
+            color: red;
+          }
+        }
+      }
+    }
+    .deparmentInfo {
+      margin-left: 10px;
+      height: 500px;
+      overflow: auto;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      .show {
+        width: 1000px;
+        background: rgb(253, 253, 253);
+        h1 {
+          font-weight: 600;
+          width: 100%;
+          background: rgb(248, 248, 248);
+          line-height: 20px;
+          margin-bottom: 10px;
+        }
+        ul {
+          display: flex;
+          flex-wrap: wrap;
+
+          li {
+            width: 33%;
+            height: 30px;
+            text-align: center;
+            p {
+              cursor: pointer;
+            }
+          }
+        }
       }
     }
   }

@@ -38,3 +38,13 @@ export interface HospitalDetail {
 export interface HospitalDetailResponseData extends ResponseData {
   data: HospitalDetail
 }
+//代表医院科室的数据
+export interface Deparment {
+  depcode: string,
+  depname: string,
+  children?: Deparment[]
+}
+export type DeparmentArr = Deparment[]
+export interface DeparmentResponseData extends ResponseData {
+  data: DeparmentArr
+}
