@@ -1,23 +1,27 @@
 <template>
   <div class="login">
-
-    <el-dialog v-model="userStore.visiable" title="用户登录">
+    <el-dialog v-model="userStore.visiable" title="用户登录" :lock-scroll="false" @close="close">
       <el-row>
         <el-col :span="12">
           <div class="logindiv">
             <div v-show="scene==0">
-              <el-form>
-                <el-form-item label="手机号：">
-                  <el-input autocomplete="off" placeholder="请输入手机号" :prefix-icon="User" />
+              <el-form :rules="rules" :model="loginParam">
+                <el-form-item label="手机号：" prop="phone">
+                  <el-input v-model="loginParam.phone" autocomplete="off" placeholder="请输入手机号" maxlength="11"
+                    :prefix-icon="User" />
                 </el-form-item>
-                <el-form-item label="验证码：" :label-width="formLabelWidth">
-                  <el-input autocomplete="off" placeholder="请输入手机验证码" :prefix-icon="Lock" />
-                </el-form-item>
-                <el-form-item :label-width="formLabelWidth">
-                  <el-button>获取验证码</el-button>
+                <el-form-item label="验证码：" prop="code" :label-width="formLabelWidth">
+                  <el-input v-model="loginParam.code" autocomplete="off" placeholder="请输入手机验证码" :prefix-icon="Lock" />
                 </el-form-item>
                 <el-form-item :label-width="formLabelWidth">
-                  <el-button type="primary" style="width:100%">用户登录</el-button>
+                  <el-button :disabled="!isPhone||flag?true:false" @click="getCode">
+                    获取验证码
+                    <CountDown v-if="flag" :flag="flag" @getFlag="getFlag" />
+                  </el-button>
+                </el-form-item>
+                <el-form-item :label-width="formLabelWidth">
+                  <el-button type="primary" style="width:100%" :disabled="!isPhone||loginParam.code.length<6?true:false"
+                    @click="login">用户登录</el-button>
                 </el-form-item>
                 <div class="bottom">
                   <p style="">微信扫码登录</p>
@@ -107,9 +111,48 @@
 <script setup lang="ts">
 import useUserStore from "@/store/modules/user";
 import { User, Lock } from "@element-plus/icons-vue";
-import { ref } from "vue";
-let scene = ref(1);
+import { ref, reactive, computed } from "vue";
+import CountDown from "@/components/countdown/index.vue";
+import { ElMessage } from "element-plus";
+let scene = ref<number>(0);
+let flag = ref<boolean>(false);
 let userStore = useUserStore();
+let loginParam = reactive({
+  phone: "",
+  code: "",
+});
+let isPhone = computed(() => {
+  let reg =
+    /^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|198|199|(147))\d{8}$/;
+  return reg.test(loginParam.phone);
+});
+const getCode = () => {
+  flag.value = true;
+  try {
+    userStore.getCodes(loginParam.phone);
+    loginParam.code = userStore.code;
+  } catch (error) {}
+};
+const getFlag = (flagvalue: boolean) => {
+  flag.value = flagvalue;
+};
+const login = async () => {
+  try {
+    await userStore.userLogin(loginParam);
+    userStore.visiable = false;
+  } catch (error) {
+    ElMessage({
+      type: "error",
+      message: (error as Error).message,
+    });
+  }
+};
+const close = () => {
+  Object.assign(loginParam, {
+    phone: "",
+    code: "",
+  });
+};
 </script>
 <script lang="ts">
 export default {
