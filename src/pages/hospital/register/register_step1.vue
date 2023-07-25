@@ -10,8 +10,8 @@
     <div class="center">
       <div class="time">{{workData?.baseMap?.workDateString}}</div>
       <div class="container">
-        <div class="item" :class="{active:item.status!=-1&&item.availableNumber!=-1}"
-          v-for="item in workData?.bookingScheduleList " :key="item">
+        <div class="item" :class="{active:item.status!=-1&&item.availableNumber!=-1,cur:index==isActive}"
+          v-for="(item,index) in workData?.bookingScheduleList " :key="item" @click="changeTime(item,index)">
           <div class="top">{{item.workDate}} {{item.dayOfWeek}}</div>
           <div class="bottom">
             <div v-if="item.status==-1">停止挂号</div>
@@ -27,11 +27,12 @@
 
     </div>
     <div class="bottom">
-      <div class="will">
-        <span class="time">202020020</span>
+      <!-- {{workData?.bookingScheduleList[isActive].status}} -->
+      <div class="will" v-if="workData?.bookingScheduleList[isActive]?.status==1">
+        <span class="time">{{workTime}} {{workData?.baseMap?.releaseTime}}</span>
         <span> 放号</span>
       </div>
-      <div class="doctor">
+      <div class="doctor" v-else>
         <div class="s">
           <div class="title">
             <svg t="1690256709188" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -42,30 +43,20 @@
             </svg>
             <span>上午号源</span>
           </div>
-          <div class="docinfo">
+          <div class="docinfo" v-for="item in doctorData" :key="item.id" v-show="item.workTime==0">
             <div class="left">
               <div class="title">
-                <div class="class">驱蚊器翁</div>
+                <div class="class">{{item.title}}</div>
                 <div class="line">|</div>
-                <div class="name">请问</div>
+                <div class="name">{{item.docname}}</div>
               </div>
-              <div class="text">qweqweqweqw2</div>
+              <div class="text">{{item.skill}}</div>
             </div>
             <div class="right">
-              <div class="price">￥1000</div>
-              <el-button type="primary" style="font-size:18px;width:150px;height:50px">剩余10</el-button>
+              <div class="price">￥{{item.amount}}</div>
+              <el-button type="primary" style="font-size:18px;width:150px;height:50px"
+                @click="goNextStep(item)">剩余{{item.availableNumber}}</el-button>
             </div>
-          </div>
-          <div class="docinfo">
-            <div class="left">
-              <div class="title">
-                <div class="class">驱蚊器翁</div>
-                <div class="line">|</div>
-                <div class="name">请问</div>
-              </div>
-              <div class="text">qweqweqweqw2</div>
-            </div>
-            <div class="right">123</div>
           </div>
         </div>
         <div class="x">
@@ -78,31 +69,22 @@
             </svg>
             <span>下午号源</span>
           </div>
-          <div class="docinfo">
+          <div class="docinfo" v-for="item in doctorData" :key="item.id" v-show="item.workTime==1">
             <div class="left">
               <div class="title">
-                <div class="class">驱蚊器翁</div>
+                <div class="class">{{item.title}}</div>
                 <div class="line">|</div>
-                <div class="name">请问</div>
+                <div class="name">{{item.docname}}</div>
               </div>
-              <div class="text">qweqweqweqw2</div>
+              <div class="text">{{item.skill}}</div>
             </div>
             <div class="right">
-              <div class="price">￥1000</div>
-              <el-button type="primary" style="font-size:18px;width:150px;height:50px">剩余10</el-button>
+              <div class="price">￥{{item.amount}}</div>
+              <el-button type="primary" style="font-size:18px;width:150px;height:50px"
+                @click="goNextStep">剩余{{item.availableNumber}}</el-button>
             </div>
           </div>
-          <div class="docinfo">
-            <div class="left">
-              <div class="title">
-                <div class="class">驱蚊器翁</div>
-                <div class="line">|</div>
-                <div class="name">请问</div>
-              </div>
-              <div class="text">qweqweqweqw2</div>
-            </div>
-            <div class="right">123</div>
-          </div>
+
         </div>
       </div>
     </div>
@@ -111,13 +93,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { reqHospitalWork } from "@/api/hospital/index";
-import type { HospitalWorkData, WorkData } from "@/api/hospital/type";
-import { useRoute } from "vue-router";
+import { reqHospitalWork, reqHospitalDoctor } from "@/api/hospital/index";
+import type { HospitalWorkData, DoctorResponseData } from "@/api/hospital/type";
+import { useRoute, useRouter } from "vue-router";
 let pageNo = ref<number>(1);
 let limit = ref<number>(6);
 let $route = useRoute();
+let $router = useRouter();
 let workData = ref<any>();
+let workTime = ref<any>();
+let doctorData = ref<any>();
+let isActive = ref<number>(0);
 const fetchWorkData = async () => {
   let result: HospitalWorkData = await reqHospitalWork(
     pageNo.value,
@@ -127,7 +113,38 @@ const fetchWorkData = async () => {
   );
   if (result.code == 200) {
     workData.value = result.data;
+    try {
+      workData.value.bookingScheduleList.forEach((item: any, index: number) => {
+        if (item.status == 0 && item.availableNumber > 0) {
+          workTime.value = item.workDate;
+          isActive.value = index;
+          throw new Error("return");
+        }
+      });
+    } catch (e: any) {
+      if (e.message !== "return") throw e;
+    }
+    getDoctorWorkData();
   }
+};
+const getDoctorWorkData = async () => {
+  let result: DoctorResponseData = await reqHospitalDoctor(
+    $route.query.hoscode as string,
+    $route.query.depcode as string,
+    workTime.value
+  );
+  if (result.code == 200) {
+    doctorData.value = result.data;
+  }
+};
+const changeTime = (item: any, index: number) => {
+  console.log(item);
+  workTime.value = item.workDate;
+  isActive.value = index;
+  getDoctorWorkData();
+};
+const goNextStep = (item: any) => {
+  $router.push({ path: "register_step2", query: { docId: item.id } });
 };
 onMounted(() => {
   fetchWorkData();
@@ -192,11 +209,14 @@ onMounted(() => {
             background: rgb(200, 239, 255);
           }
         }
+        &.cur {
+          transform: scale(1.15);
+        }
       }
     }
   }
   .bottom {
-    margin: 40px 0 0 20px;
+    margin: 40px 0 100px 20px;
     .will {
       text-align: center;
       font-size: 28px;
