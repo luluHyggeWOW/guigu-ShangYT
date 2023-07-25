@@ -53,16 +53,18 @@ const logout = () => {
   position: fixed;
   z-index: 999;
   width: 100%;
-  height: 70px;
+  height: 80px;
   background: #fff;
   display: flex;
   justify-content: center;
+  border-bottom: 2px solid rgb(237, 236, 236);
   .content {
     width: 90%;
-    height: 70px;
+    height: 78px;
     background: #fff;
     display: flex;
     justify-content: space-between;
+    // border-bottom: 2px solid rgb(216, 216, 216);
     .left {
       display: flex;
       justify-content: center;

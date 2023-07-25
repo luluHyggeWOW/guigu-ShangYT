@@ -51,7 +51,7 @@
           <h1 class="cur">{{deparment.depname}}</h1>
           <ul>
             <li v-for="(children) in deparment.children" :key="children.depcode">
-              <p @click="showLogin()">{{children.depname}}</p>
+              <p @click="showLogin(children)">{{children.depname}}</p>
             </li>
           </ul>
         </div>
@@ -64,7 +64,10 @@
 import useDetailStore from "@/store/modules/hospital";
 import { ref } from "vue";
 import useUserStore from "@/store/modules/user";
+import { useRoute, useRouter } from "vue-router";
 let userStore = useUserStore();
+let $router = useRouter();
+let $route = useRoute();
 let hospitalStore = useDetailStore();
 let currentIndex = ref<number>(0);
 console.log(111, hospitalStore.deparmentArr);
@@ -76,8 +79,13 @@ const changeIndex = (index: number) => {
     block: "start",
   });
 };
-const showLogin = () => {
-  userStore.visiable = true;
+const showLogin = (item: any) => {
+  // userStore.visiable = true;
+  console.log(item);
+  $router.push({
+    path: "/hospital/register_step1",
+    query: { hoscode: $route.query.hoscode, depcode: item.depcode },
+  });
 };
 </script>
 

@@ -59,3 +59,37 @@ export interface UserInfo {
 export interface UserLoginResponseData extends ResponseData {
   data: UserInfo
 }
+export interface WxLogin {
+  redirectUri: string,
+  appid: string,
+  scope: string,
+  state: string
+}
+export interface WxLoginResponseData extends ResponseData {
+  data: WxLogin
+}
+export interface BaseMap {
+  workDateString: string,
+  releaseTime: string,
+  bigname: string,
+  stopTime: string,
+  depname: string,
+  hosname: string
+}
+export interface WorkData {
+  workDate: string,
+  workDateMd: string,
+  dayOfweek: string,
+  docCount: number,
+  reservedNumber: null
+  availableNumber: number,
+  status: number
+}
+export type BookingScheduleList = WorkData[]
+export interface HospitalWorkData extends ResponseData {
+  data: {
+    total: number,
+    bookingScheduleList: BookingScheduleList,
+    baseMap: BaseMap
+  }
+}

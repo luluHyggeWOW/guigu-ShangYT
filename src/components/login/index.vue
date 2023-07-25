@@ -25,7 +25,7 @@
                 </el-form-item>
                 <div class="bottom">
                   <p style="">微信扫码登录</p>
-                  <svg @click="scene=1" t="1689842855664" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                  <svg @click="changeScene" t="1689842855664" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="2340" width="32" height="32">
                     <path
                       d="M337.387283 341.82659c-17.757225 0-35.514451 11.83815-35.514451 29.595375s17.757225 29.595376 35.514451 29.595376 29.595376-11.83815 29.595376-29.595376c0-18.49711-11.83815-29.595376-29.595376-29.595375zM577.849711 513.479769c-11.83815 0-22.936416 12.578035-22.936416 23.6763 0 12.578035 11.83815 23.676301 22.936416 23.676301 17.757225 0 29.595376-11.83815 29.595376-23.676301s-11.83815-23.676301-29.595376-23.6763zM501.641618 401.017341c17.757225 0 29.595376-12.578035 29.595376-29.595376 0-17.757225-11.83815-29.595376-29.595376-29.595375s-35.514451 11.83815-35.51445 29.595375 17.757225 29.595376 35.51445 29.595376zM706.589595 513.479769c-11.83815 0-22.936416 12.578035-22.936416 23.6763 0 12.578035 11.83815 23.676301 22.936416 23.676301 17.757225 0 29.595376-11.83815 29.595376-23.676301s-11.83815-23.676301-29.595376-23.6763z"
@@ -39,9 +39,7 @@
               </el-form>
             </div>
             <div v-show="scene==1" class="wechat">
-              <div class="img"><img src="../../assets/images/code_login_wechat.png" alt=""></div>
-              <p>使用微信扫一扫登录</p>
-              <p>“尚硅谷”</p>
+              <div id="login_container"></div>
               <p style="color:#7f7f7f;margin-top:20px;font-size:17px">手机短信验证码登录</p>
               <div class="svg" @click="scene=0"><svg t="1689844373401" class="icon" viewBox="0 0 1024 1024"
                   version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4118" width="32" height="32">
@@ -111,8 +109,10 @@
 <script setup lang="ts">
 import useUserStore from "@/store/modules/user";
 import { User, Lock } from "@element-plus/icons-vue";
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed, watch } from "vue";
 import CountDown from "@/components/countdown/index.vue";
+import { reqWxLogin } from "@/api/hospital/index";
+import type { WxLoginResponseData } from "@/api/hospital/type";
 import { ElMessage } from "element-plus";
 let scene = ref<number>(0);
 let flag = ref<boolean>(false);
@@ -153,6 +153,36 @@ const close = () => {
     code: "",
   });
 };
+const changeScene = async () => {
+  scene.value = 1;
+  let redirect_uri = encodeURIComponent(window.location.origin + "/wxlogin");
+  let result: WxLoginResponseData = await reqWxLogin(redirect_uri);
+  if (result.code == 200) {
+    // alert(result.data.state.slice(4));
+    console.log(result.data);
+    // @ts-ignore
+    new WxLogin({
+      self_redirect: true,
+      id: "login_container",
+      appid: result.data.appid,
+      scope: result.data.scope,
+      redirect_uri: result.data.redirectUri,
+      state: result.data.state,
+      style: "",
+      href: "",
+    });
+  } else {
+    ElMessage({ type: "error", message: "失败" });
+  }
+};
+watch(
+  () => scene.value,
+  (val: number) => {
+    if (val == 1) {
+      userStore.queryState();
+    }
+  }
+);
 </script>
 <script lang="ts">
 export default {
