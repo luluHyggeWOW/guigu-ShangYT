@@ -17,9 +17,9 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item>实名认证</el-dropdown-item>
-              <el-dropdown-item>挂号订单</el-dropdown-item>
-              <el-dropdown-item>就诊人管理</el-dropdown-item>
+              <el-dropdown-item @click="$router.push({path:'/user/certification'})">实名认证</el-dropdown-item>
+              <el-dropdown-item @click="$router.push({path:'/user/order'})">挂号订单</el-dropdown-item>
+              <el-dropdown-item @click="$router.push({path:'/user/patient'})">就诊人管理</el-dropdown-item>
               <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -30,11 +30,11 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import useUserStore from "@/store/modules/user";
 import { ArrowDown } from "@element-plus/icons-vue";
 let userStore = useUserStore();
-
+let $route = useRoute();
 let $router = useRouter();
 const goHome = () => {
   $router.push({ path: "/home" });

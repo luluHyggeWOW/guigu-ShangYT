@@ -39,8 +39,7 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-card>
-    <div class="btn"><el-button type="primary" class="btnn" size="large" :disabled="currentIndex==-1"
-        @click="submitOrder">确认提交</el-button>
+    <div class="btn"><el-button type="primary" class="btnn" size="large" :disabled="currentIndex==-1">确认提交</el-button>
     </div>
 
   </div>
@@ -50,8 +49,6 @@
 import { User } from "@element-plus/icons-vue";
 import Visitor from "./visitor.vue";
 import { reqGetUser, reqDoctorInfo } from "@/api/hospital/index";
-import { reqSubmitOrder } from "@/api/user/index";
-import type { SubmitOrder } from "@/api/user/type";
 import type {
   UserArr,
   UserResponseData,
@@ -59,11 +56,9 @@ import type {
   Doctor,
 } from "@/api/hospital/type";
 import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
+import { useRoute } from "vue-router";
 let $route = useRoute();
-let $router = useRouter();
-let userArr = ref<UserArr>([]);
+let userArr = ref<UserArr>();
 let docInfo = ref<Doctor>();
 let currentIndex = ref<number>(-1);
 const fetchUserData = async () => {
@@ -87,19 +82,6 @@ onMounted(() => {
   fetchUserData();
   fetchInfo();
 });
-const submitOrder = async () => {
-  let result: SubmitOrder = await reqSubmitOrder(
-    docInfo.value?.hoscode as string,
-    docInfo.value?.id as string,
-    userArr.value[currentIndex.value].id as number
-  );
-  if (result.code == 200) {
-    $router.push({ path: "/user/order", query: { orderId: result.data } });
-  } else {
-    ElMessage.error(result.message);
-    $router.push({ path: "/user/order", query: { orderId: 431 } });
-  }
-};
 </script>
 
 <style scoped lang="scss">
