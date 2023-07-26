@@ -48,3 +48,88 @@ export interface PayInfo {
 export interface QrCode extends ResponseData {
   data: PayInfo
 }
+export interface PayReslt extends ResponseData {
+  data: boolean
+}
+export interface UserInfo {
+  id: number,
+  createTime: string,
+  updateTime: string,
+  isDeleted: number,
+  param: {}
+  openid: null,
+  nickName: null,
+  phone: string,
+  name: string,
+  certificatesType: string
+  certificatesNo: string,
+  certificatesUrl: null,
+  authStatus: number,
+  status: number
+}
+export interface UserInfoResponseData extends ResponseData {
+  data: UserInfo
+}
+export interface CertationType {
+  id: number,
+  createTime: string,
+  updateTime: string,
+  isDeleted: number,
+  param: {},
+  parentId: number,
+  name: string,
+  value: string,
+  dictCode: string,
+  hasChildren: boolean
+}
+export type CertationArr = CertationType[];
+export interface CertationTypeResponseData extends ResponseData {
+  data: CertationArr
+}
+export interface UserParams {
+  certificatesNo: string,
+  certificatesType: string,
+  certificatesUrl: string,
+  name: string
+}
+export interface Order {
+  id: number,
+  createTime: string,
+  updateTime: string,
+  isDeleted: number,
+  param: {
+    orderStatusString: string
+  }
+  userId: number,
+  outTradeNo: string,
+  hoscode: string,
+  hosname: string,
+  depcode: string,
+  depname: string,
+  scheduleId: null,
+  title: string,
+  reserveDate: string,
+  reserveTime: number,
+  patientId: number,
+  patientName: string,
+  patientPhone: string,
+  hosRecordId: string,
+  number: number,
+  fetchTime: string,
+  fetchAddress: string,
+  amount: number,
+  quitTime: string,
+  orderStatus: number
+}
+export type Records = Order[];//获取订单接口数据的ts类型
+export interface UserOrderInfoResponseData extends ResponseData {
+  data: {
+    records: Records,
+    total: number,
+    size: number,
+    current: number,
+    orders: [],
+    hitCount: boolean,
+    searchCount: boolean,
+  }
+}

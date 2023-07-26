@@ -76,12 +76,13 @@
           </el-popconfirm>
           <el-button type="success" v-if="orderInfo.orderStatus==0" @click="openDialog">支付</el-button>
         </div>
-        <el-dialog v-model="dialogVisible" title="微信支付" width="30%" :before-close="handleClose">
-          <div class="code"><img src="../../../../assets/images/code_app.png" alt=""></div>
-
+        <el-dialog v-model="dialogVisible" title="微信支付" width="30%" @close="closeDialog">
+          <div class="code"><img v-if="imgUrl" :src="imgUrl" alt="">
+            <img v-else src="../../../../assets/images/code_app.png" alt="">
+          </div>
           <template #footer>
             <span class="dialog-footer">
-              <el-button @click="dialogVisible = false">关闭窗口</el-button>
+              <el-button @click="closeDialog">关闭窗口</el-button>
             </span>
           </template>
         </el-dialog>
@@ -94,14 +95,23 @@
 <script setup lang="ts">
 import useDetailStore from "@/store/modules/hospital";
 import { onMounted, ref } from "vue";
-import { reqOrderInfo, reqCancelOrder, reqQrCode } from "@/api/user/index";
-import type { OrderResponseData, QrCode } from "@/api/user/type";
+import {
+  reqOrderInfo,
+  reqCancelOrder,
+  reqQrCode,
+  reqQueryPayState,
+} from "@/api/user/index";
+import type { OrderResponseData, QrCode, PayReslt } from "@/api/user/type";
 import { useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
+//@ts-ignore
+import QRCode from "qrcode";
 let $route = useRoute();
 let hospitalStore = useDetailStore();
 let orderInfo = ref<any>({});
-let dialogVisible = ref(true);
+let dialogVisible = ref<boolean>(false);
+let imgUrl = ref<string>("");
+let timer = ref<any>();
 const getOrderInfo = async () => {
   let result: OrderResponseData = await reqOrderInfo(
     $route.query.orderId as string
@@ -122,7 +132,23 @@ const cancel = async () => {
 const getQrCode = async () => {
   let result: QrCode = await reqQrCode($route.query.orderId as string);
   if (result.code == 200) {
+    imgUrl.value = await QRCode.toDataURL(result.data.codeUrl);
+    timer.value = setInterval(async () => {
+      let result1: PayReslt = await reqQueryPayState(
+        $route.query.orderId as string
+      );
+      if (result1.data) {
+        dialogVisible.value = false;
+        ElMessage.success("支付成功");
+        clearInterval(timer.value);
+        getOrderInfo();
+      }
+    }, 2000);
   }
+};
+const closeDialog = () => {
+  dialogVisible.value = false;
+  clearInterval(timer.value);
 };
 const openDialog = () => {
   dialogVisible.value = true;
@@ -130,7 +156,7 @@ const openDialog = () => {
 };
 onMounted(() => {
   getOrderInfo();
-  getQrCode();
+  // getQrCode();
 });
 </script>
 
