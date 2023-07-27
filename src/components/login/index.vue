@@ -114,6 +114,9 @@ import CountDown from "@/components/countdown/index.vue";
 import { reqWxLogin } from "@/api/hospital/index";
 import type { WxLoginResponseData } from "@/api/hospital/type";
 import { ElMessage } from "element-plus";
+import { useRoute, useRouter } from "vue-router";
+let $router = useRouter();
+let $route = useRoute();
 let scene = ref<number>(0);
 let flag = ref<boolean>(false);
 let userStore = useUserStore();
@@ -140,6 +143,9 @@ const login = async () => {
   try {
     await userStore.userLogin(loginParam);
     userStore.visiable = false;
+    let redirect = $route.query.redirect;
+    if (redirect) $router.push(redirect as string);
+    else $router.push("/home");
   } catch (error) {
     ElMessage({
       type: "error",

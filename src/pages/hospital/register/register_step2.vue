@@ -7,7 +7,7 @@
       <template #header>
         <div class="card-header">
           <h1>请确认就诊人</h1>
-          <el-button type="success" @click="1" :icon="User">添加就诊人</el-button>
+          <el-button type="success" @click="goUser" :icon="User">添加就诊人</el-button>
         </div>
       </template>
       <div class="user">
@@ -83,10 +83,10 @@ const fetchInfo = async () => {
 const changeIndex = (index: number) => {
   currentIndex.value = index;
 };
-onMounted(() => {
-  fetchUserData();
-  fetchInfo();
-});
+const goUser = () => {
+  $router.push({ path: "/user/patient", query: { type: "add" } });
+};
+
 const submitOrder = async () => {
   let result: SubmitOrder = await reqSubmitOrder(
     docInfo.value?.hoscode as string,
@@ -100,6 +100,10 @@ const submitOrder = async () => {
     $router.push({ path: "/user/order", query: { orderId: 431 } });
   }
 };
+onMounted(() => {
+  fetchUserData();
+  fetchInfo();
+});
 </script>
 
 <style scoped lang="scss">

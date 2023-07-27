@@ -8,7 +8,7 @@
     </template>
     <div class="user" v-if="scene==0">
       <Visitor @changeScene="changeScene" v-for="(user,index) in userArr" :key="user.id" :user="user" class="item"
-        :index="index" :currentIndex="currentIndex" />
+        :index="index" :currentIndex="currentIndex" @getAllUser="fetchUserData" />
     </div>
     <div class="form" v-else>
       <el-form label-width="100" class="elform">
@@ -78,7 +78,8 @@
           <el-input placeholder="请输入手机号码" v-model="userParams.contactsPhone"></el-input>
         </el-form-item>
         <el-form-item class="elformitem">
-          <el-button type="">重写</el-button>
+          <el-button type="" @click="scene=0">取消</el-button>
+          <el-button type="" @click="reset">重写</el-button>
           <el-button type="primary" @click="submit">提交</el-button>
         </el-form-item>
       </el-form>
@@ -104,6 +105,11 @@ import {
 } from "@/api/user/index";
 import { ref, onMounted, reactive } from "vue";
 import { CascaderProps, ElMessage } from "element-plus";
+import { useRouter, useRoute } from "vue-router";
+import useUserStore from "@/store/modules/user";
+let userStore = useUserStore();
+let $router = useRouter();
+let $route = useRoute();
 let userArr = ref<UserArr>([]);
 let scene = ref<number>(0);
 let certationArr = ref<CertationArr>();
@@ -131,9 +137,11 @@ const fetchUserData = async () => {
 };
 const addUser = () => {
   scene.value = 1;
+  reset();
 };
-const changeScene = () => {
+const changeScene = (user: any) => {
   scene.value = 1;
+  Object.assign(userParams, user);
 };
 const getCertationType = async () => {
   let result: CertationTypeResponseData = await reqCertationType();
@@ -160,14 +168,19 @@ const props: CascaderProps = {
   },
 };
 const submit = async () => {
+  console.log(userParams);
   let result: any = await reqAddOrUpdataUser(userParams);
   if (result.code == 200) {
     ElMessage({
       type: "success",
       message: userParams.id ? "更新成功" : "添加成功",
     });
-    scene.value = 0;
-    fetchUserData();
+    if ($route.query.type == "add") {
+      $router.back();
+    } else {
+      scene.value = 0;
+      fetchUserData();
+    }
   } else {
     ElMessage({
       type: "error",
@@ -175,9 +188,34 @@ const submit = async () => {
     });
   }
 };
+const reset = () => {
+  Object.assign(userParams, {
+    name: "",
+    certificatesType: "",
+    certificatesNo: "",
+    sex: 0,
+    birthdate: "",
+    phone: "",
+    isMarry: 0,
+    isInsure: 0,
+    addressSelected: [],
+    address: "",
+    contactsName: "",
+    contactsCertificatesType: "",
+    contactsCertificatesNo: "",
+    contactsPhone: "",
+  });
+};
 onMounted(() => {
   fetchUserData();
   getCertationType();
+  if ($route.query.type == "add") {
+    scene.value = 1;
+  } else if ($route.query.type == "edit") {
+    Object.assign(userParams, userStore.patientInfo);
+    console.log(userParams);
+    scene.value = 1;
+  }
 });
 </script>
 

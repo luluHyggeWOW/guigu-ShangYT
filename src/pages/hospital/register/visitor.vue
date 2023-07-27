@@ -6,8 +6,12 @@
         <div class="name">{{user.name}}</div>
       </div>
       <div class="btnbox">
-        <el-button type="primary" :icon="Edit" circle class="btn" @click="$emit('changeScene')" />
-        <el-button v-if="$route.path=='/user/patient'" type="danger" :icon="Delete" circle class="btn" />
+        <el-button type="primary" :icon="Edit" circle class="btn" @click="EditUser" />
+        <el-popconfirm :title="`你确定要删除${user.name}吗？`" @confirm="DeleteUser" width="200">
+          <template #reference>
+            <el-button v-if="$route.path=='/user/patient'" type="danger" :icon="Delete" circle class="btn" />
+          </template>
+        </el-popconfirm>
       </div>
 
     </div>
@@ -31,10 +35,35 @@
 
 <script setup lang="ts">
 import { Edit, Delete } from "@element-plus/icons-vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import useUserStore from "@/store/modules/user";
+import { reqRemoveUser } from "@/api/user/index";
+import { ElMessage } from "element-plus";
 let $route = useRoute();
-defineProps(["user", "currentIndex", "index"]);
-let $emit = defineEmits(["changeScene"]);
+let $router = useRouter();
+let props = defineProps(["user", "currentIndex", "index"]);
+let $emit = defineEmits(["changeScene", "getAllUser"]);
+let userStore = useUserStore();
+const EditUser = () => {
+  if ($route.path == "/user/patient") {
+    $emit("changeScene", props.user);
+  } else {
+    Object.assign(userStore.patientInfo, props.user);
+    $router.push({
+      path: "/user/patient",
+      query: { type: "edit" },
+    });
+  }
+};
+const DeleteUser = async () => {
+  let result: any = await reqRemoveUser(props.user.id);
+  if (result.code == 200) {
+    $emit("getAllUser");
+    ElMessage({ type: "success", message: "删除成功" });
+  } else {
+    ElMessage({ type: "error", message: "删除失败" });
+  }
+};
 </script>
 
 <style scoped lang="scss">

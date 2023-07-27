@@ -19,8 +19,8 @@ enum API {
   ORDERSTATE_URL = '/order/orderInfo/auth/getStatusList',
   CITY_URL = '/cmn/dict/findByParentId/',
   ADDUSER_URL = '/user/patient/auth/save',
-  UPDATEUSER_URL = '/user/patient/auth/update'
-
+  UPDATEUSER_URL = '/user/patient/auth/update',
+  DELETEUSER_URL = '/user/patient/auth/remove/'
 }
 export const reqSubmitOrder = (hscode: string, scheduleId: string, patientId: number) => request.post<any, SubmitOrder>(API.SUBMITORDER_URL + `${hscode}/${scheduleId}/${patientId}`)
 export const reqOrderInfo = (id: string) => request.get<any, OrderResponseData>(API.GETORDERINFO_URL + id)
@@ -35,6 +35,7 @@ export const reqAllUser = () => request.get<any, AllUserResponseData>(API.ALLUSE
 export const reqOrderState = () => request.get<any, AllOrderStateResponseData>(API.ORDERSTATE_URL)
 export const reqCity = (parentId: string) => request.get<any, AddOrUpdateUser>(API.CITY_URL + parentId)
 export const reqAddOrUpdataUser = (data: any) => {
-  if (data.id) return request.post<any, any>(API.ADDUSER_URL, data)
+  if (data.id == undefined) return request.post<any, any>(API.ADDUSER_URL, data)
   else return request.post<any, any>(API.UPDATEUSER_URL, data)
 }
+export const reqRemoveUser = (id: number) => request.delete<any, any>(API.DELETEUSER_URL + id)

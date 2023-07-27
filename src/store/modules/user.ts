@@ -9,7 +9,24 @@ const useUserStore = defineStore('User', {
     return {
       visiable: false,
       code: '',
-      userInfo: JSON.parse(GET_TOKEN() as string) || {}
+      userInfo: JSON.parse(GET_TOKEN() as string) || {},
+      patientInfo: {
+        id: "",
+        name: "",
+        certificatesType: "",
+        certificatesNo: "",
+        sex: 0,
+        birthdate: "",
+        phone: "",
+        isMarry: 0,
+        isInsure: 0,
+        addressSelected: [],
+        address: "",
+        contactsName: "",
+        contactsCertificatesType: "",
+        contactsCertificatesNo: "",
+        contactsPhone: "",
+      }
     }
   },
   actions: {
@@ -33,14 +50,19 @@ const useUserStore = defineStore('User', {
       }
     },
     async userLogout() {
-      let result: UserLoginResponseData = await reqUserLogin(loginData)
-      if (result.code == 200) {
-        this.userInfo = result.data
-        REMOVE_TOKEN()
-        return 'ok'
-      } else {
-        return Promise.reject(new Error(result.message))
+      REMOVE_TOKEN()
+      this.userInfo = {
+        name: '',
+        token: ''
       }
+      // let result: UserLoginResponseData = await reqUserLogin()
+      // if (result.code == 200) {
+      //   this.userInfo = result.data
+      //   REMOVE_TOKEN()
+      //   return 'ok'
+      // } else {
+      //   return Promise.reject(new Error(result.message))
+      // }
     },
     queryState() {
       let timer = setInterval(() => {

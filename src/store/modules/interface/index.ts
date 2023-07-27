@@ -1,4 +1,5 @@
 import type { HospitalDetail, DeparmentArr, UserInfo } from "@/api/hospital/type";
+import type { AddOrUpdateUser } from "@/api/user/type";
 
 export interface DetailState {
   hospitalInfo: HospitalDetail
@@ -7,7 +8,8 @@ export interface DetailState {
 export interface UserState {
   visiable: boolean,
   code: string,
-  userInfo: UserInfo
+  userInfo: UserInfo,
+  patientInfo: AddOrUpdateUser
 }
 
 
