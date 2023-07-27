@@ -8,13 +8,16 @@
     <div class="top">
       <el-form inline="true">
         <el-form-item prop=" " label="就诊人：">
-          <el-select placeholder="请选就诊人">
-            <el-option :label="item.name" :value="item.value" v-for="item in arrType" :key="item.id"></el-option>
+          <el-select placeholder="请选就诊人" v-model="patientId" @change="getData">
+            <el-option label="全部就诊人" value=""></el-option>
+            <el-option :label="item.name" :value="item.id" v-for="item in allUser" :key="item.id"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="订单状态">
-          <el-select placeholder="请选择订单状态">
-            <el-option :label="item.name" :value="item.value" v-for="item in arrType" :key="item.id"></el-option>
+          <el-select placeholder="请选择订单状态" v-model="orderStatus" @change="getData">
+            <el-option label="全部订单状态" value=""></el-option>
+            <el-option :label="item.comment" :value="item.status" v-for="(item,index) in allOrderState"
+              :key="index"></el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -34,7 +37,7 @@
       </el-table>
       <el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
         :small="small" :disabled="disabled" :background="true" layout=" prev, pager, next, jumper,->, sizes,total"
-        :total="total" @size-change="getOrderInfo()" @current-change="getOrderInfo" style="margin:10px" />
+        :total="total" @size-change="handlerSizeChange" @current-change="getOrderInfo" style="margin:10px" />
     </div>
   </el-card>
 </template>
@@ -42,8 +45,15 @@
 <script setup lang="ts">
 import useDetailStore from "@/store/modules/hospital";
 import { onMounted, ref } from "vue";
-import { reqUserOrderInfo } from "@/api/user/index";
-import type { UserOrderInfoResponseData, Records } from "@/api/user/type";
+import { reqUserOrderInfo, reqAllUser, reqOrderState } from "@/api/user/index";
+import type {
+  UserOrderInfoResponseData,
+  Records,
+  AllUser,
+  AllOrderStateResponseData,
+  AllOrderState,
+  AllUserResponseData,
+} from "@/api/user/type";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { ArrowDown } from "@element-plus/icons-vue";
@@ -58,6 +68,8 @@ let total = ref<number>(100);
 let patientId = ref<string>("");
 let orderStatus = ref<string>("");
 let allOrderArr = ref<Records>();
+let allUser = ref<AllUser>();
+let allOrderState = ref<AllOrderState>();
 const getOrderInfo = async () => {
   let result: UserOrderInfoResponseData = await reqUserOrderInfo(
     pageNo.value,
@@ -73,8 +85,24 @@ const getOrderInfo = async () => {
 const goDetail = (row: any) => {
   $router.push({ path: "/user/order", query: { orderId: row.id } });
 };
+const handlerSizeChange = (pageSizes: number) => {
+  pageSize.value = pageSizes;
+  getOrderInfo();
+};
+const getData = async () => {
+  let result1: AllUserResponseData = await reqAllUser();
+  let result2: AllOrderStateResponseData = await reqOrderState();
+  if (result1.code == 200) {
+    allUser.value = result1.data;
+  }
+  if (result2.code == 200) {
+    allOrderState.value = result2.data;
+  }
+};
+
 onMounted(() => {
   getOrderInfo();
+  getData();
 });
 </script>
 

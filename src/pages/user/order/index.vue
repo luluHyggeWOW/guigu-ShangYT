@@ -1,19 +1,19 @@
 <template>
   <div>
     <div>
-      <Detail></Detail>
-    </div>
-    <div>
-      <Allorder></Allorder>
+      <Detail v-if="$route.query.orderId"></Detail>
+      <Allorder v-else></Allorder>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import useDetailStore from "@/store/modules/hospital";
+//@ts-ignore
 import Detail from "./detail/index.vue";
+//@ts-ignore
 import Allorder from "./allorder/index.vue";
-let hospitalStore = useDetailStore();
+import { useRoute } from "vue-router";
+let $route = useRoute();
 </script>
 
 <style scoped lang="scss">

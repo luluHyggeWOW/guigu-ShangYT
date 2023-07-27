@@ -5,7 +5,11 @@
         <div class="tip">{{user.isInsure==0?'自费':'医保'}}</div>
         <div class="name">{{user.name}}</div>
       </div>
-      <el-button type="primary" :icon="Edit" circle style="float: right;" class="btn" />
+      <div class="btnbox">
+        <el-button type="primary" :icon="Edit" circle class="btn" @click="$emit('changeScene')" />
+        <el-button v-if="$route.path=='/user/patient'" type="danger" :icon="Delete" circle class="btn" />
+      </div>
+
     </div>
     <div class="bottom">
       <el-form class="form">
@@ -26,14 +30,18 @@
 </template>
 
 <script setup lang="ts">
-import { Edit } from "@element-plus/icons-vue";
+import { Edit, Delete } from "@element-plus/icons-vue";
+import { useRoute } from "vue-router";
+let $route = useRoute();
 defineProps(["user", "currentIndex", "index"]);
+let $emit = defineEmits(["changeScene"]);
 </script>
 
 <style scoped lang="scss">
 .visitor {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  border-radius: 10px;
   .top {
     width: 100%;
     height: 80px;
@@ -62,8 +70,10 @@ defineProps(["user", "currentIndex", "index"]);
         margin: 10px;
       }
     }
-    .btn {
-      margin: 30px;
+    .btnbox {
+      margin-right: 30px;
+      .btn {
+      }
     }
   }
   .bottom {

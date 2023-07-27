@@ -1,55 +1,226 @@
 <template>
-  <div class="notice">
-    <h1>{{hospitalStore.hospitalInfo.hospital?.hosname}}</h1>
-    <div class="title">为方便您早日就医康复，请您认真阅读预约挂号须知：</div>
-    <div class="info">
-      <div class="title">一、预约实名制</div>
-      <div class="text">统一平台电话预约和网上预约挂号均采取实名制注册预约，请您如实提供就诊人员的真实姓名、有效证件号(身份证、护照)、性别、手机号码。
-        社保卡号等基本信息</div>
-      <div class="title">二、预约挂号</div>
-      <div class="text" style="margin:20px 0 20px 0">按照北京市卫健委统一平台要求，预约挂号规则如下:</div>
-      <div class="text">在同一自然日，同一医院，同一科室，同一就诊单元，同一就诊人，可以预约最多1个号源;</div>
-      <div class="text">在同一自然周，同一就诊人，可以预约最多8个号源;</div>
-      <div class="text">在同一自然月，同一就诊人，可以预约最多12个号源;</div>
-      <div class="text"> 在同一自然季度，同一就诊人，可以预约最多24个号源。</div>
-      <div class="title">三、取消预约</div>
-      <div class="text">已完成预约的号源，如需办理退号，至少在就诊前一工作日14:00前通过网站、微信公众号、114电话等平台预约渠道进行取消预约。</div>
-      <div class="title">四、爽约处理</div>
-      <div class="text" style="margin:20px 0 20px 0">如预约成功后果者未能按时疏诊目不办理取消而约号现为赛约，同一更者在目然年内赛约现则如下:</div>
-      <div class="text">景计要约3次，90天内不允许通过114平合进行预约挂号;</div>
-      <div class="text">累计爽约6次目6次爽约日起180天内不允许通过114平台进行预约挂号</div>
+  <el-card class="box-card">
+    <template #header>
+      <div class="card-header">
+        <h1>就诊人管理</h1>
+        <el-button type="success" @click="addUser" :icon="User">添加就诊人</el-button>
+      </div>
+    </template>
+    <div class="user" v-if="scene==0">
+      <Visitor @changeScene="changeScene" v-for="(user,index) in userArr" :key="user.id" :user="user" class="item"
+        :index="index" :currentIndex="currentIndex" />
     </div>
-
-  </div>
+    <div class="form" v-else>
+      <el-form label-width="100" class="elform">
+        <el-divider>就诊人信息</el-divider>
+        <el-form-item class="elformitem" label="用户姓名：">
+          <el-input placeholder="请输入用户姓名" v-model="userParams.name"></el-input>
+        </el-form-item>
+        <el-form-item class="elformitem" label="证件类型：">
+          <el-select placeholder="请选择证件类型" v-model="userParams.certificatesType" style="width:100%">
+            <el-option :label="item.name" :value="item.value" v-for="item in certationArr" :key="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item class="elformitem" label="证件号码：">
+          <el-input placeholder="请输入证件号码" v-model="userParams.certificatesNo"></el-input>
+        </el-form-item>
+        <el-form-item class="elformitem" label="用户性别：">
+          <el-radio-group class="ml-4" v-model="userParams.sex">
+            <el-radio label="1" size="large">男</el-radio>
+            <el-radio label="0" size="large">女</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item class="elformitem" label="出生日期：">
+          <el-date-picker type="date" placeholder="请选择日期" v-model="userParams.birthdate" value-format="YYYY-MM-DD" />
+        </el-form-item>
+        <el-form-item class="elformitem" label="手机号码：">
+          <el-input placeholder="请输入手机号码" v-model="userParams.phone"></el-input>
+        </el-form-item>
+      </el-form>
+      <el-form label-width="100" class="elform">
+        <el-divider>建档信息（完善后部分医院首次就诊不排队建档）</el-divider>
+        <el-form-item class="elformitem" label="婚姻状况：">
+          <el-radio-group class="ml-4" v-model="userParams.isMarry">
+            <el-radio label="1" size="large">已婚</el-radio>
+            <el-radio label="0" size="large">未婚</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item class="elformitem" label="自费/医保：">
+          <el-radio-group class="ml-4" v-model="userParams.isInsure">
+            <el-radio label="1" size="large">自费</el-radio>
+            <el-radio label="0" size="large">医保</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <el-form label-width="100" class="elform">
+        <el-divider>当前的住址</el-divider>
+        <el-form-item class="elformitem" label="用户地址：">
+          <el-cascader :props="props" v-model="userParams.addressSelected" />
+        </el-form-item>
+        <el-form-item class="elformitem" label="详细地址：">
+          <el-input placeholder="请输入详细地址" v-model="userParams.address"></el-input>
+        </el-form-item>
+      </el-form>
+      <el-form label-width="100" class="elform">
+        <el-divider>联系人信息（选填）</el-divider>
+        <el-form-item class="elformitem" label="用户姓名：">
+          <el-input placeholder="请输入用户姓名" v-model="userParams.contactsName"></el-input>
+        </el-form-item>
+        <el-form-item class="elformitem" label="证件类型：">
+          <el-select placeholder="请选择证件类型" style="width:100%" v-model="userParams.contactsCertificatesType">
+            <el-option :label="item.name" :value="item.value" v-for="item in certationArr" :key="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item class="elformitem" label="证件号码：">
+          <el-input placeholder="请输入证件号码" v-model="userParams.contactsCertificatesNo"></el-input>
+        </el-form-item>
+        <el-form-item class="elformitem" label="手机号码：">
+          <el-input placeholder="请输入手机号码" v-model="userParams.contactsPhone"></el-input>
+        </el-form-item>
+        <el-form-item class="elformitem">
+          <el-button type="">重写</el-button>
+          <el-button type="primary" @click="submit">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </el-card>
 </template>
 
 <script setup lang="ts">
-import useDetailStore from "@/store/modules/hospital";
-let hospitalStore = useDetailStore();
+//@ts-ignore
+import Visitor from "@/pages/hospital/register/visitor.vue";
+import type { UserArr, UserResponseData } from "@/api/hospital/type";
+import type {
+  CertationTypeResponseData,
+  CertationArr,
+  AddOrUpdateUser,
+} from "@/api/user/type";
+import { User } from "@element-plus/icons-vue";
+import { reqGetUser } from "@/api/hospital/index";
+import {
+  reqAddOrUpdataUser,
+  reqCertationType,
+  reqCity,
+} from "@/api/user/index";
+import { ref, onMounted, reactive } from "vue";
+import { CascaderProps, ElMessage } from "element-plus";
+let userArr = ref<UserArr>([]);
+let scene = ref<number>(0);
+let certationArr = ref<CertationArr>();
+let userParams = reactive<AddOrUpdateUser>({
+  name: "",
+  certificatesType: "",
+  certificatesNo: "",
+  sex: 0,
+  birthdate: "",
+  phone: "",
+  isMarry: 0,
+  isInsure: 0,
+  addressSelected: [],
+  address: "",
+  contactsName: "",
+  contactsCertificatesType: "",
+  contactsCertificatesNo: "",
+  contactsPhone: "",
+});
+const fetchUserData = async () => {
+  let result: UserResponseData = await reqGetUser();
+  if (result.code == 200) {
+    userArr.value = result.data;
+  }
+};
+const addUser = () => {
+  scene.value = 1;
+};
+const changeScene = () => {
+  scene.value = 1;
+};
+const getCertationType = async () => {
+  let result: CertationTypeResponseData = await reqCertationType();
+  if (result.code == 200) {
+    certationArr.value = result.data;
+  }
+};
+const props: CascaderProps = {
+  lazy: true,
+  async lazyLoad(node, resolve) {
+    let result: any = await reqCity((node?.data?.id as string) || "86");
+    if (result.code == 200) {
+      let showData = result.data.map((item: any) => {
+        return {
+          id: item.id,
+          label: item.name,
+          value: item.value,
+          leaf: !item.hasChildren,
+        };
+      });
+      console.log(showData);
+      resolve(showData);
+    }
+  },
+};
+const submit = async () => {
+  let result: any = await reqAddOrUpdataUser(userParams);
+  if (result.code == 200) {
+    ElMessage({
+      type: "success",
+      message: userParams.id ? "更新成功" : "添加成功",
+    });
+    scene.value = 0;
+    fetchUserData();
+  } else {
+    ElMessage({
+      type: "error",
+      message: userParams.id ? "更新失败" : "添加失败",
+    });
+  }
+};
+onMounted(() => {
+  fetchUserData();
+  getCertationType();
+});
 </script>
 
 <style scoped lang="scss">
-.notice {
-  margin: 50px;
-  font-size: 18px;
-  h1 {
+.box-card {
+  margin: 40px 0;
+  .card-header {
     display: flex;
-    font-size: 30px;
-    justify-content: center;
-  }
-  .title {
-    color: #7f7f77;
-    margin-top: 20px;
-  }
-  .info {
-    div {
-      color: #7f7f77;
-      line-height: 20px;
+    justify-content: space-between;
+    align-items: center;
+    h1 {
+      font-size: 24px;
+      margin: 10px;
     }
-    .title {
-      font-weight: 600;
-      margin: 20px 0 20px 0;
+  }
+  .user {
+    display: flex;
+    flex-wrap: wrap;
+    .item {
+      width: 23%;
+      margin: 1%;
     }
+  }
+  .form {
+    .elform {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      .elformitem {
+        width: 40%;
+      }
+    }
+  }
+}
+.btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+  .btnn {
+    width: 200px;
   }
 }
 </style>

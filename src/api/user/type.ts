@@ -133,3 +133,63 @@ export interface UserOrderInfoResponseData extends ResponseData {
     searchCount: boolean,
   }
 }
+export interface User {
+  id: number,
+  createTime: string,
+  updateTime: string,
+  isDeleted: number,
+  param: {
+    certificatesTypeString: string,
+    contactsCertificatesTypeString: string,
+    cityString: null,
+    fullAddress: string,
+    districtString: null,
+    provinceString: null,
+  }
+  userId: number,
+  name: string,
+  certificatesType: string,
+  certificatesNo: string,
+  sex: number,
+  birthdate: string,
+  phone: string,
+  isMarry: number,
+  provinceCode: null,
+  cityCode: null,
+  districtCode: null,
+  address: string
+  contactsName: string,
+  contactsCertificatesType: string,
+  contactsCertificatesNo: string,
+  contactsPhone: string,
+  isInsure: number,
+  cardNo: null,
+  status: string
+}
+export type AllUser = User[]
+export interface AllUserResponseData extends ResponseData {
+  data: AllUser
+}
+export interface OrderState {
+  comment: string,
+  status: number
+}
+export type AllOrderState = OrderState[]//全部订单状态码接口返回的数据ts类型\
+export interface AllOrderStateResponseData extends ResponseData { data: AllOrderState }
+export interface AddOrUpdateUser {
+  id?: string,
+  name: string,
+  certificatesType: string,
+  certificatesNo: string,
+  sex: number
+  birthdate: string,
+  phone: string,
+  isMarry: number,
+  isInsure: number,
+  addressSelected: string[],
+  address: string,
+  contactsName: string,
+  contactsCertificatesType: string,
+  contactsCertificatesNo: string,
+  contactsPhone: string
+}

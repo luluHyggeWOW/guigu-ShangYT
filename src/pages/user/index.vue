@@ -51,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+//@ts-ignore
 import {
   Postcard,
   Memo,
